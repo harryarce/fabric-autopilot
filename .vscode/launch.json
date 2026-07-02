@@ -1,0 +1,21 @@
+{
+    // Run the Fabric SQL Explorer from the Run and Debug view (F5).
+    // Streamlit apps must be launched via the `streamlit` module.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Fabric SQL Explorer (Streamlit)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "${workspaceFolder}/app/streamlit_app.py",
+                "--server.headless=true"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        }
+    ]
+}

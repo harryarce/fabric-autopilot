@@ -1,0 +1,17 @@
+{
+  "_comment": "Risk/insurance domain acronyms and short tokens that benefit from an explicit description or Q&A synonym so Copilot can answer natural-language questions. Keys are lowercase whole-word tokens; values are the expansion shown in audit/recommendation text.",
+  "terms": {
+    "ibnr": "Incurred But Not Reported reserves",
+    "rmis": "Risk Management Information System",
+    "tpa": "Third-Party Administrator",
+    "wc": "Workers' Compensation",
+    "gl": "General Liability",
+    "alae": "Allocated Loss Adjustment Expense",
+    "ulae": "Unallocated Loss Adjustment Expense",
+    "los": "Loss",
+    "clmt": "Claimant",
+    "lr": "Loss Run",
+    "paid": "Paid",
+    "rsrv": "Reserve"
+  }
+}

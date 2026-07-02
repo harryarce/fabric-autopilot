@@ -1,0 +1,68 @@
+# syntax=docker/dockerfile:1
+# ---------------------------------------------------------------------------
+# Fabric SaaS MCP server image (agent-facing).
+#
+# Bakes the Microsoft ODBC Driver 18 because MCP tools call the service layer
+# directly (in-process), including schema extraction via pyodbc. Serves the MCP
+# protocol over streamable-http so agent hosts can reach it over the network.
+# ---------------------------------------------------------------------------
+FROM python:3.11-slim AS base
+
+# DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: the Power BI Modeling MCP server is a
+# .NET app that fails fast at startup (System.Globalization / ToLowerInvariant)
+# when no ICU package is present. Invariant-globalization mode needs no libicu —
+# version-proof across Debian base-image bumps (bookworm->trixie change libicuNN).
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    FABRIC_MCP_TRANSPORT=streamable-http \
+    FABRIC_MCP_HOST=0.0.0.0 \
+    FABRIC_MCP_PORT=8000 \
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+
+# NOTE: install the unixODBC *runtime* (unixodbc) explicitly and do NOT run
+# `apt-get autoremove`. The driver (libmsodbcsql-18.*.so) dlopen()s
+# libodbcinst.so.2 at runtime; autoremove prunes that auto-installed dep and
+# leaves the driver present-but-unloadable, which unixODBC then reports as the
+# misleading "Can't open lib ... file not found".
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl gnupg apt-transport-https ca-certificates \
+        unixodbc unixodbc-dev gcc g++ \
+    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc \
+        | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
+    && curl -sSL https://packages.microsoft.com/config/debian/12/prod.list \
+        -o /etc/apt/sources.list.d/mssql-release.list \
+    && sed -i 's#deb https://#deb [signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://#' \
+        /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
+    # Node.js 20+ runtime so the Power BI Modeling MCP server
+    # (npx @microsoft/powerbi-modeling-mcp) can launch over stdio in this
+    # otherwise headless container. The chat surface injects a managed-identity
+    # XMLA token (POWERBI_MODELING_MCP_HEADLESS=true) instead of a browser.
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && apt-get purge -y curl gnupg \
+    && rm -rf /var/lib/apt/lists/* \
+    # Fail the build now if the registered driver can't actually be loaded.
+    && DRIVER_LIB="$(sed -n 's/^Driver=//p' /etc/odbcinst.ini | head -n1)" \
+    && test -f "$DRIVER_LIB" \
+    && ! ldd "$DRIVER_LIB" | grep -q 'not found'
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY app/ ./app/
+COPY fabric_services/ ./fabric_services/
+COPY fabric_api/ ./fabric_api/
+COPY fabric_mcp/ ./fabric_mcp/
+COPY fabric_app/ ./fabric_app/
+RUN pip install --upgrade pip && pip install ".[mcp,agents]"
+
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
+
+EXPOSE 8000
+
+CMD ["python", "-m", "fabric_mcp"]

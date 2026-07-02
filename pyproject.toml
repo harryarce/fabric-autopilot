@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fabric-autopilot"
+version = "0.1.0"
+description = "Fabric Autopilot — deterministic + agentic automation for Microsoft Fabric semantic models and reports (REST API, MCP server, web UI)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+# Core runtime shared by every layer (cores, data, services).
+dependencies = [
+    "azure-identity>=1.17.0",
+    "azure-storage-blob>=12.20.0",
+    "requests>=2.31.0",
+    "pandas>=2.1.0",
+    "pyodbc>=5.1.0",
+]
+
+[project.optional-dependencies]
+# FastAPI backend service.
+api = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "azure-monitor-opentelemetry>=1.6.0",
+]
+# MCP server (agent-facing facade).
+mcp = [
+    "mcp>=1.2.0",
+]
+# Streamlit frontend.
+web = [
+    "streamlit>=1.36.0",
+    "httpx>=0.27.0",
+]
+# Optional Foundry-backed agentic layer (design / suggestions / audit enrichment).
+agents = [
+    "agent-framework>=1.0.0b1",
+    "agent-framework-foundry>=1.0.0b1",
+    "azure-ai-projects>=1.0.0b1",
+]
+# Everything, for local development.
+dev = [
+    "fabric-autopilot[api,mcp,web,agents]",
+    "httpx>=0.27.0",
+]
+
+[tool.setuptools]
+# Flat layout: each top-level package is importable from the repo root.
+packages = [
+    "app",
+    "app.intelligence",
+    "app.intelligence.audit",
+    "app.ui",
+    "fabric_services",
+    "fabric_api",
+    "fabric_api.agents",
+    "fabric_api.routers",
+    "fabric_mcp",
+    "fabric_app",
+]
+
+[tool.setuptools.package-data]
+"app.intelligence" = ["resources/*.json"]
+"fabric_api.agents" = ["skills/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = ["artifacts", "fabric_api/agents/skills"]
+
+[tool.ruff.lint]
+# Pyflakes (F) catches real bugs; a focused pycodestyle subset for hygiene.
+select = ["F", "E4", "E7", "E9", "I"]
+ignore = ["E741"]
+
+[tool.ruff.lint.per-file-ignores]
+# Streamlit entrypoints bootstrap sys.path before importing app packages.
+"app/streamlit_app.py" = ["E402"]
+"fabric_app/streamlit_app.py" = ["E402"]

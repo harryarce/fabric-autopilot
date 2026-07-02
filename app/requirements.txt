@@ -1,0 +1,11 @@
+streamlit>=1.36.0
+azure-identity>=1.17.0
+requests>=2.31.0
+pandas>=2.1.0
+pyodbc>=5.1.0
+
+# Intelligence layer (semantic-model agent) — optional; the app degrades
+# gracefully when these are not installed.
+agent-framework>=1.0.0b1
+agent-framework-foundry>=1.0.0b1
+azure-ai-projects>=1.0.0b1

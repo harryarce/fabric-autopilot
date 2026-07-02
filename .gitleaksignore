@@ -1,0 +1,12 @@
+# gitleaks ignore file
+# Format: <commit-sha>:<filepath>:<rule-id>:<line>
+# or just the fingerprint emitted by gitleaks.
+#
+# False positives below are well-known PUBLIC Azure built-in RBAC role
+# definition GUIDs (Microsoft documents these openly). They are not secrets:
+#   ba92f5b4-2d11-453d-a403-e96b0029c9fe = Storage Blob Data Contributor
+#   4633458b-17de-408a-b874-0445c86b69e6 = Key Vault Secrets User
+#   7f951dda-4ed3-4680-a7ca-43fe172d538d = AcrPull
+# Reference: https://learn.microsoft.com/azure/role-based-access-control/built-in-roles
+
+d370017d9e40fbc26c1a43554199d904ffab6420:infra/resources.bicep:generic-api-key:129

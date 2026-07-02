@@ -1,0 +1,17 @@
+{
+  "name": "FabricDevAI",
+  "description": "Accessible, WCAG-AA-aligned default theme used by the FabricDevAI report remediation engine. Tenants may override by dropping a same-shaped JSON at FABRIC_REPORT_THEME_PATH.",
+  "background": "#FFFFFF",
+  "foreground": "#1F2937",
+  "tableAccent": "#005EB8",
+  "dataColors": [
+    "#005EB8",
+    "#0078D4",
+    "#107C10",
+    "#A4262C",
+    "#8764B8",
+    "#C19C00",
+    "#038387",
+    "#5C2D91"
+  ]
+}

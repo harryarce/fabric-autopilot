@@ -1,0 +1,8 @@
+azure-identity>=1.17.0
+requests>=2.31.0
+
+# Intelligence layer (semantic-model agent). Optional at runtime — the app and
+# the deterministic generator work without these installed.
+agent-framework>=1.0.0b1
+agent-framework-foundry>=1.0.0b1
+azure-ai-projects>=1.0.0b1

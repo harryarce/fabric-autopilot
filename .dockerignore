@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.mypy_cache/
+
+# Local artifacts & data
+artifacts/
+*.log
+
+# VCS & tooling
+.git/
+.github/
+.gitignore
+.vscode/
+.azure/
+
+# Docs & tests (not needed at runtime)
+docs/
+tests/
+
+# Node / misc
+node_modules/

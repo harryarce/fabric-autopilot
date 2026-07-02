@@ -1,0 +1,34 @@
+# syntax=docker/dockerfile:1
+# ---------------------------------------------------------------------------
+# Fabric SaaS web (Streamlit) image.
+#
+# Pure presentation tier: no ODBC driver or Fabric SDK — it reaches the
+# platform only through the REST API (FABRIC_API_BASE_URL). Runs the decoupled
+# fabric_app/streamlit_app.py entrypoint.
+# ---------------------------------------------------------------------------
+FROM python:3.11-slim AS base
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    STREAMLIT_SERVER_PORT=8000 \
+    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
+    STREAMLIT_SERVER_HEADLESS=true \
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY app/ ./app/
+COPY fabric_services/ ./fabric_services/
+COPY fabric_api/ ./fabric_api/
+COPY fabric_mcp/ ./fabric_mcp/
+COPY fabric_app/ ./fabric_app/
+RUN pip install --upgrade pip && pip install ".[web]"
+
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
+
+EXPOSE 8000
+
+CMD ["streamlit", "run", "fabric_app/streamlit_app.py"]

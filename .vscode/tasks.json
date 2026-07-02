@@ -1,0 +1,26 @@
+{
+    // One-click run without the debugger: Terminal → Run Task → "Run Fabric SQL Explorer".
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Fabric SQL Explorer",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "streamlit",
+                "run",
+                "app/streamlit_app.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true
+        }
+    ]
+}
