@@ -17,10 +17,9 @@ agent is unavailable or errors.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
-
-import logging
 
 from app.artifacts import ArtifactRef, ArtifactStore
 from app.fabric_client import CreatedItem, FabricClient, FabricItem

@@ -7,7 +7,6 @@ import unittest
 from app.intelligence import GeneratedMeasure, generate_dax_measure
 from app.intelligence.spec import (
     SemanticColumn,
-    SemanticMeasure,
     SemanticModelSpec,
     SemanticTable,
 )

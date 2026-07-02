@@ -43,7 +43,6 @@ from fabric_services.artifact_service import ArtifactService
 from fabric_services.context import TenantContext
 from fabric_services.errors import NotFoundError
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

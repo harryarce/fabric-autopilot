@@ -472,8 +472,6 @@ class SchemaDiscoveryCachingTests(unittest.TestCase):
         """
         from app.fabric_client import FabricThrottledError
 
-        base = "https://api.fabric.microsoft.com/v1/workspaces/ws-4"
-
         def fake_get(url, headers=None, params=None, timeout=None):
             if url.endswith("/sqlEndpoints"):
                 # Simulate Fabric throttling on the preview API.

@@ -15,8 +15,8 @@ from ..models import (
     PersistSuggestionsRequest,
     ProposeReportSuggestionsRequest,
     PublishReportRequest,
-    SuggestReportRequest,
     SuggestionStatusRequest,
+    SuggestReportRequest,
     UpdateReportRequest,
     to_jsonable,
 )

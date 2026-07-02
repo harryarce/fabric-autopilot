@@ -19,7 +19,16 @@ from __future__ import annotations
 
 from ..report_spec import ReportSpec
 from ..spec import SemanticModelSpec
-from . import bpa, copilot_prep, dax, dax_patterns, design, remediation, report_agent, report_formatting, usability
+from . import (
+    bpa,
+    copilot_prep,
+    dax,
+    dax_patterns,
+    design,
+    report_agent,
+    report_formatting,
+    usability,
+)
 from .base import (
     ERROR,
     INFO,

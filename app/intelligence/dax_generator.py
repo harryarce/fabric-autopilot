@@ -14,7 +14,7 @@ can wrap this generator as a tool and rewrite the rationale + name.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from .spec import SemanticColumn, SemanticMeasure, SemanticModelSpec, SemanticTable

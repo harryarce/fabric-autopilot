@@ -31,7 +31,7 @@ from importlib import resources
 from ..report_spec import ReportSpec, ReportTheme
 from ..spec import SemanticModelSpec, SemanticTable
 from ..suggestions import SuggestionSpec
-from . import copilot_prep, report_formatting, usability
+from . import copilot_prep, report_formatting
 
 # ---------------------------------------------------------------------------
 # Branded default theme — loaded lazily, tenant-overridable

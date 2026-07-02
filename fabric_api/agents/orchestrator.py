@@ -20,7 +20,7 @@ Streamlit UI render identical transcripts.
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Iterator, Optional
 
 from fabric_services import ServiceContainer

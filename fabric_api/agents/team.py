@@ -124,10 +124,11 @@ def build_team(
     config = config or AgentTeamConfig.from_env()
     toolkit = ToolKit(container, tenant)
 
+    import os
+
     from agent_framework import Agent
     from agent_framework.foundry import FoundryChatClient
     from azure.identity.aio import DefaultAzureCredential
-    import os
 
     client_id = os.environ.get("AZURE_CLIENT_ID") or None
     credential = DefaultAzureCredential(

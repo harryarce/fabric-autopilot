@@ -22,11 +22,13 @@ optional and imported lazily.
 
 from __future__ import annotations
 
+from .dax_generator import GeneratedMeasure, generate_dax_measure
 from .definition import (
     DefinitionFormat,
     SemanticModelDefinition,
     build_definition,
 )
+from .nl_to_dax import DaxTranslation, NlToDaxError, nl_to_dax
 from .report_builder import (
     VisualSuggestion,
     compose_report,
@@ -90,8 +92,6 @@ from .suggestions import (
     suggestions_from_dict,
     suggestions_to_dict,
 )
-from .dax_generator import GeneratedMeasure, generate_dax_measure
-from .nl_to_dax import DaxTranslation, NlToDaxError, nl_to_dax
 from .tmdl_parser import TmdlParseError, parse_semantic_model
 
 __all__ = [

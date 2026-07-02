@@ -26,15 +26,14 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from app.intelligence import ReportSpec, SemanticModelSpec, SuggestionSpec
-from fabric_services import ServiceContainer, build_container
-from fabric_services.context import TenantContext
-
 from fabric_api.agents import (
     AgentOrchestrator,
     OrchestrationRequest,
     ToolKit,
     capability_status,
 )
+from fabric_services import ServiceContainer, build_container
+from fabric_services.context import TenantContext
 
 from .serialize import to_jsonable
 
