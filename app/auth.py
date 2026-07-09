@@ -55,6 +55,28 @@ POWERBI_XMLA_SCOPE = "https://analysis.windows.net/powerbi/api/.default"
 # Refresh a token this many seconds before it actually expires.
 _EXPIRY_SKEW_SECONDS = 300
 
+# Seconds to wait for the Azure CLI (and other subprocess-based developer
+# credentials) to respond. ``azure-identity`` defaults to 10 seconds, but a cold
+# ``az account get-access-token`` invocation routinely takes 5-8 seconds and can
+# exceed 10 seconds when several credentials in the ``DefaultAzureCredential``
+# chain are probed concurrently at startup. When that happens the SDK logs a
+# misleading "Failed to invoke the Azure CLI" warning even though the developer
+# is signed in. A larger, configurable timeout removes that noise. Overridable
+# via ``AZURE_CLI_PROCESS_TIMEOUT`` for constrained environments.
+try:
+    _CLI_PROCESS_TIMEOUT = int(os.environ.get("AZURE_CLI_PROCESS_TIMEOUT", "30"))
+except ValueError:
+    _CLI_PROCESS_TIMEOUT = 30
+
+def cli_process_timeout() -> int:
+    """Return the subprocess timeout (seconds) for CLI-based credentials.
+
+    Shared by the synchronous :class:`TokenProvider` and the asynchronous
+    ``DefaultAzureCredential`` instances used by the intelligence agents so a
+    single ``AZURE_CLI_PROCESS_TIMEOUT`` override applies everywhere.
+    """
+    return _CLI_PROCESS_TIMEOUT
+
 
 class AuthError(RuntimeError):
     """Raised when an access token cannot be acquired."""
@@ -83,12 +105,15 @@ class TokenProvider:
         self._credential = DefaultAzureCredential(
             managed_identity_client_id=managed_identity_client_id,
             exclude_interactive_browser_credential=True,
+            process_timeout=_CLI_PROCESS_TIMEOUT,
         )
         # Explicit fallback used only when the primary credential fails to
         # produce a token (e.g. a Managed Identity probe times out or returns
         # an unauthenticated token chain locally). Resolved lazily so machines
         # without the Azure CLI installed are not penalised at startup.
-        self._fallback_credential = AzureCliCredential()
+        self._fallback_credential = AzureCliCredential(
+            process_timeout=_CLI_PROCESS_TIMEOUT,
+        )
         self._cache: dict[str, _CachedToken] = {}
         self._lock = threading.Lock()
 

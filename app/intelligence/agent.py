@@ -402,10 +402,13 @@ class SemanticModelIntelligence:
 
         from azure.identity.aio import DefaultAzureCredential
 
+        from app.auth import cli_process_timeout
+
         client_id = os.environ.get("AZURE_CLIENT_ID") or None
         return DefaultAzureCredential(
             managed_identity_client_id=client_id,
             exclude_interactive_browser_credential=True,
+            process_timeout=cli_process_timeout(),
         )
 
     def _chat_client(self, credential):
