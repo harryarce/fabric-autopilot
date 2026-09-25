@@ -392,6 +392,7 @@ fabric-autopilot/
 | [docs/openapi.json](docs/openapi.json) | Machine-readable API contract. |
 | [DEPLOY.md](DEPLOY.md) | Deploy quick reference. |
 | [app/README.md](app/README.md) | Legacy direct-mode Streamlit app. |
+| [Fabric as Code: Scale Analytics with AI and Deterministic Automation](https://community.fabric.microsoft.com/blog/community_blog/fabric-as-code-scale-analytics-with-ai-and-deterministic-automation/5279996) | Microsoft Fabric Community article about scaling analytics with AI and deterministic automation. |
 
 ## ✅ Testing & quality
 
