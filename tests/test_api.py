@@ -8,13 +8,16 @@ any Fabric / SQL / Foundry connectivity.
 from __future__ import annotations
 
 import unittest
+from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 
+from app.auth import AuthError
 from app.fabric_client import Workspace
 from app.sql_client import ColumnSchema, TableSchema
 from fabric_api.dependencies import get_container
 from fabric_api.main import create_app
+from fabric_services.provisioning_service import ProvisioningService
 
 
 def _fake_workspace() -> Workspace:
@@ -399,6 +402,46 @@ class ApiContractTests(unittest.TestCase):
         body = resp.json()
         self.assertEqual(body[0]["id"], "ws-1")
         self.assertEqual(body[0]["name"], "Demo Workspace")
+
+    def test_workspace_token_failure_returns_actionable_problem(self) -> None:
+        fabric = Mock()
+        fabric.list_workspaces.side_effect = AuthError("Azure CLI login expired")
+        container = Mock()
+        container.provisioning_service.return_value = ProvisioningService(fabric)
+        self.app.dependency_overrides[get_container] = lambda: container
+
+        resp = self.client.get("/api/v1/workspaces")
+
+        self.assertEqual(resp.status_code, 503)
+        self.assertIn("application/problem+json", resp.headers["content-type"])
+        body = resp.json()
+        self.assertEqual(body["code"], "fabric_authentication_failed")
+        self.assertIn("az login --tenant", body["detail"])
+        self.assertNotIn("Azure CLI login expired", body["detail"])
+
+    def test_disabled_fabric_resource_returns_actionable_problem(self) -> None:
+        fabric = Mock()
+        fabric.list_workspaces.side_effect = AuthError(
+            "AADSTS500014: The service principal for resource "
+            "'https://api.fabric.microsoft.com' is disabled."
+        )
+        container = Mock()
+        container.provisioning_service.return_value = ProvisioningService(fabric)
+        self.app.dependency_overrides[get_container] = lambda: container
+
+        resp = self.client.get("/api/v1/workspaces")
+
+        self.assertEqual(resp.status_code, 503)
+        self.assertEqual(resp.json()["code"], "fabric_authentication_failed")
+        self.assertIn("AADSTS500014", resp.json()["detail"])
+        self.assertIn("disabled", resp.json()["detail"])
+        self.assertIn("administrator", resp.json()["detail"])
+
+        health = self.client.get("/api/v1/health/fabric")
+        self.assertEqual(health.status_code, 200)
+        self.assertFalse(health.json()["ok"])
+        self.assertEqual(health.json()["message"], resp.json()["detail"])
+        self.assertNotIn("Service principals can use Fabric APIs", health.json()["message"])
 
     def test_extract_schemas(self) -> None:
         resp = self.client.post(

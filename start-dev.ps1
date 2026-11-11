@@ -45,19 +45,11 @@ foreach ($p in @($ApiPort, $WebPort)) {
     }
 }
 
-# Local dev should authenticate to Azure / Microsoft Foundry as the developer
-# (your `az login` identity), not as any stray service-principal env vars
-# (AZURE_CLIENT_ID/SECRET/TENANT_ID) or a dev-box managed identity that may be
-# left over from other projects. `AZURE_TOKEN_CREDENTIALS=dev` (azure-identity
-# >= 1.23) makes DefaultAzureCredential try only developer credentials
-# (Azure CLI / VS Code / azd / Azure PowerShell), skipping EnvironmentCredential
-# and ManagedIdentityCredential. Production (Container Apps) does not use this
-# script, so its managed-identity auth is unaffected. Override by pre-setting
-# AZURE_TOKEN_CREDENTIALS before invoking this script.
-if (-not $env:AZURE_TOKEN_CREDENTIALS) {
-    $env:AZURE_TOKEN_CREDENTIALS = "dev"
-    Write-Host "Auth: AZURE_TOKEN_CREDENTIALS=dev (using your az login identity)." -ForegroundColor DarkGray
-}
+# Pin local authentication to AzureCliCredential (azure-identity >= 1.24),
+# including when another credential was selected in the parent environment.
+# Production does not use this script, so managed-identity auth is unaffected.
+$env:AZURE_TOKEN_CREDENTIALS = "AzureCliCredential"
+Write-Host "Auth: AzureCliCredential (using your az login identity)." -ForegroundColor DarkGray
 
 Write-Host "Starting backend (FastAPI) on $apiBaseUrl ..." -ForegroundColor Cyan
 $api = Start-Process -FilePath "uvicorn" `

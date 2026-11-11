@@ -120,7 +120,7 @@ Every high-value capability has a **rules-based core** with no network or AI dep
 
 ### 3. Secretless & Azure-native
 
-Authentication is exclusively `DefaultAzureCredential`. In Azure, a **user-assigned Managed Identity** is granted the exact roles it needs (Storage Blob Data Contributor, Key Vault Secrets User, AcrPull). Locally, your `az login` identity is used. There are no API keys, connection strings, or client secrets anywhere in the app or the Bicep.
+Authentication uses `DefaultAzureCredential` with an explicit Azure CLI fallback for Fabric/SQL access. In Azure, a **user-assigned Managed Identity** is granted the exact roles it needs (Storage Blob Data Contributor, Key Vault Secrets User, AcrPull). Local development pins the credential chain to **`AzureCliCredential`**, using your `az login` identity only. There are no API keys, connection strings, or client secrets anywhere in the app or the Bicep.
 
 - **`azd up` provisions the whole stack** — Container Apps environment, ACR (Basic), user-assigned MI, Storage (blob artifacts container), Key Vault (RBAC), Log Analytics, Application Insights.
 - **All write paths to Fabric are opt-in** — publish endpoints require explicit intent, are approval-gated for the agent team, and record an audit trail via `AuditLogService`.
@@ -142,6 +142,7 @@ python -m pip install -e ".[dev]"
 
 # 3. Sign in (local dev uses your Azure CLI identity)
 az login
+$env:AZURE_TOKEN_CREDENTIALS = "AzureCliCredential"
 
 # 4. Run the API
 uvicorn fabric_api.main:app --reload          # http://localhost:8000/docs
@@ -168,7 +169,7 @@ ruff check .
 ./start-dev.ps1
 ```
 
-Launches the API, MCP server, and Streamlit UI in three terminals with the right environment variables wired in.
+Launches the API and Streamlit UI with `AZURE_TOKEN_CREDENTIALS=AzureCliCredential`, overriding any inherited credential selection. Requires `azure-identity>=1.24.0`; Azure deployments retain managed-identity authentication.
 
 </details>
 
@@ -437,4 +438,3 @@ This project references but is not affiliated with or endorsed by Microsoft. **M
 ---
 
 **Built on open standards:** [Model Context Protocol](https://modelcontextprotocol.io) · [OpenAPI](https://www.openapis.org/) · [RFC 7807 Problem Details](https://www.rfc-editor.org/rfc/rfc7807) · [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/) · [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/)
-

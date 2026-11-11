@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.auth import AuthError
 from app.fabric_client import FabricApiError, FabricClient, Workspace
 
 from .errors import FabricAccessError, UpstreamError
@@ -41,12 +42,38 @@ class ProvisioningService:
         the API/MCP layers return a clean problem response instead of a raw 500:
         an authentication/authorization failure (401/403) becomes a
         :class:`FabricAccessError`; any other upstream failure becomes an
-        :class:`UpstreamError`.
+        :class:`UpstreamError`. Token acquisition failures return a 503 with
+        credential guidance rather than being mistaken for workspace denial.
         """
         try:
             return self._fabric.list_workspaces()
         except FabricAccessError:
             raise
+        except AuthError as exc:
+            message = (
+                "Could not acquire a Fabric access token. Locally, sign in to "
+                "the tenant containing your Fabric workspaces with "
+                "'az login --tenant <fabric-tenant-id> "
+                "--scope https://api.fabric.microsoft.com/.default'. "
+                "In Azure, verify the assigned Managed Identity."
+            )
+            if "AADSTS500014" in str(exc):
+                message = (
+                    "Microsoft Entra rejected the Fabric token request "
+                    "(AADSTS500014): the Fabric resource service principal "
+                    "is disabled in the selected tenant. Sign in to the "
+                    "correct Fabric tenant with 'az login --tenant "
+                    "<fabric-tenant-id> --scope "
+                    "https://api.fabric.microsoft.com/.default', or ask "
+                    "that tenant's administrator to re-enable the Fabric "
+                    "resource enterprise application."
+                )
+            raise FabricAccessError(
+                message,
+                code="fabric_authentication_failed",
+                status=503,
+                details={"reason": str(exc)},
+            ) from exc
         except FabricApiError as exc:
             if exc.status_code in (401, 403):
                 raise FabricAccessError(
